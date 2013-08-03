@@ -31,7 +31,6 @@ on early-fs
     insmod /lib/modules/sec_param.ko
     insmod /lib/modules/j4fs.ko
 
-
 on fs
     mount tmpfs tmpfs /tmp
     mount rfs /dev/stl9 /system nosuid nodev check=no
@@ -39,10 +38,11 @@ on fs
     mount rfs /dev/stl10 /cache nosuid nodev
     mount j4fs /dev/stl6 /mnt/.lfs 
 
-    chown system system /data
+	chown system system /data
     chmod 0771 /data  
 
-  
+
+    
 on post-fs
 
     write /proc/sys/kernel/panic_on_oops 1
@@ -62,8 +62,6 @@ on post-fs
 
     chown system cache /cache/recovery
     chmod 0770 /cache/recovery
-
-
 on boot
 
     ifup lo

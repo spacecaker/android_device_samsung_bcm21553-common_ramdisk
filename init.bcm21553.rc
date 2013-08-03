@@ -43,13 +43,7 @@ on boot
     chown system system /dev/ttyGS0
     chown system system /dev/ttyS0
 
-    insmod /system/lib/modules/memalloc.ko
-    insmod /system/lib/modules/hx170dec.ko
-    insmod /system/lib/modules/h6270enc.ko
-    insmod /system/lib/modules/gememalloc.ko    
-    insmod /system/lib/modules/ge_drv.ko   
-    insmod /system/lib/modules/brcm_switch.ko
-    insmod /system/lib/modules/bcm_headsetsw.ko
+
 
     chown system system /sys/module/bcm215xx_pm/parameters/debug
 
