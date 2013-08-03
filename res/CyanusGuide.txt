@@ -1,0 +1,13 @@
+**Guide to set swap, gov and i/o schedulers of cyanus kernel
+
+*****GOV and i/o sched:
+	open your /system/.cyanus by any kind of explore program (i recommend root explorer)
+	create 2 empty files,one is the name of the governor u want to use,the other is the name of the i/o sched (all letters in lowercase)
+	Name of CPU governors:	brazillianwax,interactive,scary,userspace,lazy,smoothass,savagedzen,
+				interactivex,lagfree,minmax,smartassv2,conservative,powersave,lionheart,ondemand,performance
+	Name of I/O schedulers: sio,noop,cfq,deadline,vr
+*****SWAP: default the swap is turned on,if u dont want to use it,just put a file named swapoff in /system/.cyanus
+
+
+***example: when my /system/.cyanus have the three files ( and this guide file): lazy; sio; swapoff
+	then my phone boots up with lazy gorvernor, sio scheduler and swap is off
