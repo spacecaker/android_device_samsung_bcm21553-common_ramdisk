@@ -1,7 +1,6 @@
 on post-fs
 
 # permissions for system server and daemons (accelerometer & magnetic & proximity)
-    
     mkdir /data/misc/sensors 0777 system misc
 
     chown root system /dev/mmc328x
@@ -36,18 +35,16 @@ on boot
     chown shell system /dev/bcm_atc
     chmod 0660 /dev/bcm_alsa_voip
     chown radio system /dev/bcm_alsa_voip
-    chmod 0666 /dev/v3d
+	chmod 0666 /dev/v3d
     chmod 0777 /dev/camera
     chown system system /sys/bcm/cache
     chmod 0771 /dev/ttyGS0
     chown system system /dev/ttyGS0
     chown system system /dev/ttyS0
 
-
-
     chown system system /sys/module/bcm215xx_pm/parameters/debug
 
-# For ASE application
+#for ASE application
     mkdir /data/brcm
     mkdir /data/brcm/ase
     mkdir /data/brcm/ase/extras
@@ -70,62 +67,71 @@ on boot
     chmod 0777 /data/brcm/ase/scripts/atmode.sh
     chmod 0777 /data/brcm/ase/scripts/usbconfig.sh
 
-# For kexec
+# for kexec
     chmod 755 /system/bin/kexec
     chmod 0771 /data
     chmod 0777 /data/kexec.sh
 
-# runSysCmd
+#runSysCmd
     mkdir /data/misc/utils 0777
 
     chown system system /data/misc/utils
-
-# permisssion for cache-ops
+#permisssion for cacheops
 	chmod 0666 /dev/cache-ops 
 
-# DHCP Service init
-    setprop wifi.interface "eth0"
+#DHCP Service init
+	setprop wifi.interface "eth0"
 
     mkdir /system/etc/wifi 0770 wifi wifi
-    chmod 0777 /system/etc/wifi
-    chmod 0777 /system/etc/wifi/wpa_supplicant.conf
+    chmod 0770 /system/etc/wifi
+    chmod 0660 /system/etc/wifi/wpa_supplicant.conf
     chown wifi wifi /system/etc/wifi/wpa_supplicant.conf
-    #wpa_supplicant control socket for android wifi.c (android private socket)
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
-    chmod 0775 /data/misc/wifi/sockets
-    chmod 0775 /data/misc/wifi
-    chmod 0775 /data/misc/wifi/wpa_supplicant.conf
+    chmod 0770 /data/misc/wifi/sockets
+    chmod 0770 /data/misc/wifi
+    chmod 0660 /data/misc/wifi/wpa_supplicant.conf
     chown wifi wifi /data/misc/wifi
     chown wifi wifi /data/misc/wifi/wpa_supplicant.conf
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
     chmod 0775 /data/misc/dhcp
 
+    chmod 0775 /data/misc/wifi/wl
+    chown wifi wifi /data/misc/wifi/wl
+    chmod 0775 /data/misc/wifi/iperf
+    chown wifi wifi /data/misc/wifi/iperf
+    chmod 0775 /data/misc/wifi/nvram.txt
+    chown wifi wifi /data/misc/wifi/nvram.txt
+    copy /system/etc/wifi/.nvmac.info /data/misc/wifi/.nvmac.info
+    chmod 0660 /data/misc/wifi/.nvmac.info
+    chown wifi wifi /data/misc/wifi/.nvmac.info
+
+
+
     # Let wifi control BT_VREG_CTL GPIO
     chown wifi wifi /sys/class/gpio/gpio21/value
     chmod 0664 /sys/class/gpio/gpio21/value
 
-# Bluetooth
-    chown root bluetooth /dev/ttyS1
-    chmod 0660 /dev/ttyS1
-    chown root bluetooth /sys/class/rfkill/rfkill0
-    chown root bluetooth /sys/class/rfkill/rfkill0/state
-    chown root bluetooth /sys/class/rfkill/rfkill0/claim
-    chown root bluetooth /sys/class/rfkill/rfkill0/soft
-    chmod 0664 /sys/class/rfkill/rfkill0/state
-    chmod 0664 /sys/class/rfkill/rfkill0/claim
-    chmod 0664 /sys/class/rfkill/rfkill0/soft
-    chown root bluetooth /sys/class/sound/controlC0/FMDirectPlay
-
-    setprop service.brcm.bt.pbap_mode btld
-
-    chown system bluetooth /data/local.prop
-
     setprop ro.bt.bdaddr_path "/data/misc/bluetooth/.nvmac_bt.info"
-    chmod 0660 ro.bt.bdaddr_path
 
-# GPS
+# for bluetooth
+chown root bluetooth /dev/ttyS1
+chmod 0660 /dev/ttyS1
+chown root bluetooth /sys/class/rfkill/rfkill0
+chown root bluetooth /sys/class/rfkill/rfkill0/state
+chown root bluetooth /sys/class/rfkill/rfkill0/claim
+chown root bluetooth /sys/class/rfkill/rfkill0/soft
+chmod 0664 /sys/class/rfkill/rfkill0/state
+chmod 0664 /sys/class/rfkill/rfkill0/claim
+chmod 0664 /sys/class/rfkill/rfkill0/soft
+chown root bluetooth /sys/class/sound/controlC0/FMDirectPlay
+setprop service.brcm.bt.pbap_mode btld
+chown system bluetooth /data/local.prop
+setprop ro.bt.bdaddr_path "/data/misc/bluetooth/.nvmac_bt.info"
+chmod 0660 ro.bt.bdaddr_path
+#for GPS files
+
     chown gps system /dev/ttyS2
 
     write /sys/class/gpio/export 56
@@ -143,7 +149,7 @@ on boot
     chown gps system /dev/bcm_gps
     chown gps system /dev/bcm_cntin
 
-# VT config
+#for VT config
     mkdir /data/vt 0777
     chmod 0777 /system/etc/vt/3g324mConfig.val
     chmod 0777 /system/etc/vt/testplay.3gp
@@ -165,87 +171,84 @@ on boot
     chmod 0640 /dev/mtd/mtd9
 
 
-# Rename apanic files with timestamp
+# rename apanic files with timestamp
 service ap_log_ren /system/bin/sh /system/etc/apanic_rename.sh
     oneshot
 
-# runSysCmd
+#runSysCmd
 service runSysCmd /system/bin/runSysCmd /data/misc/utils/setusbmode.txt 70
     oneshot
 
-# Bluetooth
+# Make sure we startup btld before hcid
 service btld /system/bin/logwrapper /system/bin/btld -hb 3000000 -hp /dev/ttyS1 -lpm 1 -nice -7
     user root
     group bluetooth net_bt_admin
     disabled
     oneshot
 
+service gpsd /system/bin/glgps -c /system/etc/gps/glconfig4751.xml
+    user gps
+    group system sdcard_rw inet
+
+#STOPSHIP: Remove logwrapper and -d option before production
 service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -d -n
     socket bluetooth stream 660 bluetooth bluetooth
     socket dbus_bluetooth stream 660 bluetooth bluetooth
     group bluetooth net_bt_admin misc
     disabled
 
-service hfag /system/bin/sdptool add --channel=10 HFAG
+#service hfag /system/bin/sdptool add --channel=10 HFAG
+#    user bluetooth
+#    group bluetooth net_bt_admin
+#    disabled
+#    oneshot
+#service hsag /system/bin/sdptool add --channel=11 HSAG
+#    user bluetooth
+#    group bluetooth net_bt_admin
+#    disabled
+#    oneshot
+
+#service opush /system/bin/sdptool add --channel=12 OPUSH
+#    user bluetooth
+#    group bluetooth net_bt_admin
+#    disabled
+#    oneshot
+
+#service pbap /system/bin/sdptool add --channel=19 PBAP
+#    user bluetooth
+#    group bluetooth net_bt_admin
+#    disabled
+#    oneshot
+
+#service map /system/bin/sdptool add --channel=16 MAS
+#    user bluetooth
+#    group bluetooth net_bt_admin
+#    disabled
+#    oneshot
+
+service hciattach /system/bin/logwrapper /system/bin/brcm_patchram_plus --enable_hci \
+    --baudrate 3000000 --patchram /system/bin/BCM4330B1_002.001.003.0634.0652.hcd /dev/ttyS1
     user bluetooth
     group bluetooth net_bt_admin
     disabled
     oneshot
 
-service hsag /system/bin/sdptool add --channel=11 HSAG
-    user bluetooth
-    group bluetooth net_bt_admin
-    disabled
-    oneshot
-
-service opush /system/bin/sdptool add --channel=12 OPUSH
-    user bluetooth
-    group bluetooth net_bt_admin
-    disabled
-    oneshot
-
-service pbap /system/bin/sdptool add --channel=19 PBAP
-    user bluetooth
-    group bluetooth net_bt_admin
-    disabled
-    oneshot
-
-service map /system/bin/sdptool add --channel=16 MAS
-    user bluetooth
-    group bluetooth net_bt_admin
-    disabled
-    oneshot
-
-service hciattach /system/bin/logwrapper /system/bin/brcm_patchram_plus --bd_addr 4C0B3A2DF4B8 --enable_hci --tosleep 50000 --baudrate 3000000 --use_baudrate_for_download --i2s=1,1,0,1 --no2bytes --patchram /system/bin/BCM4330B1_002.001.003.0634.0652.hcd /dev/ttyS1
-    user bluetooth
-    group bluetooth net_bt_admin
-    disabled
-    oneshot
-
-# GPS
-service gpsd /system/bin/glgps -c /system/etc/gps/glconfig4751.xml
-    user gps
-    group system sdcard_rw inet
-
-# DHCP
-on property:init.svc.wpa_supplicant=stopped
-    stop dhcpcd
-
-# Wifi
 service wpa_supplicant /system/bin/wpa_supplicant -dd -Dwext -ieth0 -c /data/misc/wifi/wpa_supplicant.conf
-    socket wpa_eth0 dgram 660 wifi wifi
-    group system wifi inet
-    disabled
-    oneshot
-
+	socket wpa_eth0 dgram 660 wifi wifi
+	group system wifi inet
+	disabled
+	oneshot
 
 service dhcpcd_eth0 /system/bin/dhcpcd
-    disabled
-    oneshot
+    	disabled
+    	oneshot
 
-service iprenew_eth0 /system/bin/dhcpcd -n
-    disabled
-    oneshot
+service dhcpcd /system/bin/dhcpcd -BKL eth0
+	disabled
+	oneshot
+
+on property:init.svc.wpa_supplicant=stopped
+	stop dhcpcd
 
 #for WiFi MFG(TestMode)
 service mfgloader /system/bin/mfgloader
@@ -258,25 +261,33 @@ service wlandutservice /system/bin/wlandutservice
     disabled
     oneshot
 
+#service macloader /system/bin/macloader
+#    oneshot
+# end of wifi
+
 # Kexec enable
 service kexec /data/kexec.sh
-    oneshot
+	oneshot
 
-# usb_portd
+#usb_portd
 service console /system/bin/usb_portd
-    console
-    user system
-    group vpn net_admin net_raw radio system log mount
-    oneshot
+	console
+        user system
+        group vpn net_admin net_raw radio system log mount
+        oneshot
 
-# MAC Adress
 service get_macaddrs /system/bin/get_macaddrs
     user root
     oneshot
     disabled
+
+on property:init.svc.ril-daemon=running
+    start get_macaddrs
 
 #start memsicd service
 service memsicd /system/bin/memsicd
     user system
     group system    
     oneshot
+
+
