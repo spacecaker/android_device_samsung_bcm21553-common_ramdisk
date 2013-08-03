@@ -629,6 +629,14 @@ chmod 0755 /sbin/busybox
 
     import /system/etc/init.local.rc
 
+# Patch
+    start bootscript
+
+on property:boot.ready=1
+    stop bootscript
+
+    class_start default
+
 ## for Wi-Fi
 #    setprop wifi.interface wlan0
 #    insmod /system/wifi/ar6000.ko "ifname=wlan0"
@@ -641,6 +649,10 @@ service ext4-fix /sbin/ext4-fix.sh
     oneshot
     disabled
 
+service bootscript /sbin/bootscript.sh
+    user root
+    oneshot
+    disabled
 service ueventd /sbin/ueventd
     critical
 

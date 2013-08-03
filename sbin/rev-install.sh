@@ -19,6 +19,7 @@
 # symlinking some file
 /sbin/busybox ln -s /res/recovery.fstab /etc/recovery.fstab
 
+
 # Unlock BML partition
 /sbin/bmlunlock
 
@@ -208,6 +209,6 @@
 /sbin/busybox rm /cache/update.zip
 /sbin/busybox touch /tmp/.ignorebootmessage
 
-setprop recovery-installed 1 
+setprop rev-install.ready 1 
 
 exit 1
