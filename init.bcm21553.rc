@@ -236,7 +236,6 @@ service wpa_supplicant /system/bin/wpa_supplicant -dd -Dwext -ieth0 -c /data/mis
     disabled
     oneshot
 
-
 service dhcpcd_eth0 /system/bin/dhcpcd
     disabled
     oneshot
@@ -275,7 +274,7 @@ service get_macaddrs /system/bin/get_macaddrs
 on property:init.svc.ril-daemon=running
     start get_macaddrs 
 
-#start memsicd service
+# Memsicd
 service memsicd /system/bin/memsicd
     user system
     group system    
