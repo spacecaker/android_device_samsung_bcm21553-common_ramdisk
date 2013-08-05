@@ -194,7 +194,7 @@ on property:ro.secure=0
 # service charging /system/bin/poweroff_charging
 service charging /system/bin/playlpm
 service lpmkey /system/bin/charging_mode
-				user root
-				oneshot
+    user root
+    oneshot
 				
 
