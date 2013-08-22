@@ -23,7 +23,7 @@ on init
 
 on early-fs
 
-    # rfs drivers
+# RFS drivers
     insmod /lib/modules/fsr.ko
     insmod /lib/modules/fsr_stl.ko
     insmod /lib/modules/rfs_glue.ko
@@ -38,13 +38,10 @@ on fs
     mount rfs /dev/stl10 /cache nosuid nodev
     mount j4fs /dev/stl6 /mnt/.lfs 
 
-	chown system system /data
+    chown system system /data
     chmod 0771 /data  
 
-
-    
 on post-fs
-
     write /proc/sys/kernel/panic_on_oops 1
     write /proc/sys/kernel/hung_task_timeout_secs 0
     write /proc/cpu/alignment 4
@@ -62,8 +59,8 @@ on post-fs
 
     chown system cache /cache/recovery
     chmod 0770 /cache/recovery
-on boot
 
+on boot
     ifup lo
     hostname localhost
     domainname localdomain
