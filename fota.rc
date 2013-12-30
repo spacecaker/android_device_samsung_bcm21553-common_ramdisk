@@ -33,10 +33,9 @@ on early-fs
 
 on fs
     mount tmpfs tmpfs /tmp
-    start ext4-fix
-    mount ext4 /dev/stl9 /system nosuid nodev check=no
-    mount ext4 /dev/stl11 /data nosuid nodev check=no
-    mount ext4 /dev/stl10 /cache nosuid nodev
+    mount rfs /dev/stl9 /system nosuid nodev check=no
+    mount rfs /dev/stl11 /data nosuid nodev check=no
+    mount rfs /dev/stl10 /cache nosuid nodev
     mount j4fs /dev/stl6 /mnt/.lfs 
 
     chown system system /data

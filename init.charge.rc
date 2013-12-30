@@ -99,9 +99,13 @@ on fs
 # Mount init.charge --> offline charging on EXT4 and RFS
     chmod 0755 /sbin/ext4-fix.sh
     start ext4-fix  
+    mount rfs /dev/stl9 /system check=no
     mount ext4 /dev/stl9 /system wait rw
+    mount rfs /dev/stl9 /system ro remount
     mount ext4 /dev/stl9 /system wait ro remount
+    mount rfs /dev/stl11 /data nosuid nodev check=no
     mount ext4 /dev/stl11 /data wait nosuid nodev
+    mount rfs /dev/stl10 /cache nosuid nodev
     mount ext4 /dev/stl10 /cache wait nosuid nodev
 
 on post-fs
