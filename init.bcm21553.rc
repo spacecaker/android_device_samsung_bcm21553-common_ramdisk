@@ -163,6 +163,10 @@ on boot
     chown root radio /dev/mtd/mtd9
     chmod 0640 /dev/mtd/mtd9
 
+# Setprops for CyanMobile eXperience
+    setprop ro.squadzone.build 1
+    setprop persist.sys.gmaps_hack 1
+
 
 # Rename apanic files with timestamp
 service ap_log_ren /system/bin/sh /system/etc/apanic_rename.sh
