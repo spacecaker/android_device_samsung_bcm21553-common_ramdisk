@@ -48,12 +48,13 @@ loglevel 3
     mkdir /cache 0771 system cache
     mkdir /config 0500 root root
 
-										#/*ASW3 YONG_ODE_START*/ 
-										    mkdir /efs 0771 system system
-										    chown system system /efs
-										    chmod 0771 /efs
+    ############################## SEARCH FILTER: WIP
+    #/*ASW3 YONG_ODE_START*/ 
+    mkdir /efs 0771 system system
+    chown system system /efs
+    chmod 0771 /efs
+    #/*ASW3 YONG_ODE_END*/
 
-										#/*ASW3 YONG_ODE_END*/
     # Directory for putting things only root should see.
     mkdir /mnt/secure 0700 root root
 
@@ -81,39 +82,6 @@ loglevel 3
     write /proc/sys/kernel/sched_wakeup_granularity_ns 2000000
     write /proc/sys/kernel/sched_compat_yield 1
     write /proc/sys/kernel/sched_child_runs_first 0
-
-									## mount mtd partitions
-									#	# Mounting of /cache
-									#	mount rfs /dev/stl14 /cache nosuid nodev check=no
-
-									#    # Mounting of system/userdata is moved to 'on emmc' and 'on nand' sections
-									#    # We chown/chmod /data again so because mount is run as root + defaults
-									#	mount rfs /dev/stl13 /data nosuid nodev check=no
-									#    chown system system /data
-									#    chmod 0771 /data
-
-									#    # Mount /system rw first to give the filesystem a chance to save a checkpoint
-									#	mount rfs /dev/stl12 /system ro check=no
-
-									#    chmod 0770 /dev/stl9
-									#    chmod 0770 /dev/stl10
-									#    chmod 0770 /dev/stl11
-									#    chmod 0770 /dev/stl12
-									#    chmod 0770 /dev/stl13
-									#    chmod 0770 /dev/stl14
-									#    chmod 0770 /dev/stl15
-
-									#    chmod 0770 /dev/bml9
-									#    chmod 0770 /dev/bml10
-									#    chmod 0770 /dev/bml11
-									#    chmod 0770 /dev/bml12
-									#    chmod 0770 /dev/bml13
-									#    chmod 0770 /dev/bml14
-									#    chmod 0770 /dev/bml15
-									    
-									#    # for fota : bml10 param partition, bml11 fota partition
-									#    chown radio /dev/bml10
-									#    chown radio /dev/bml11
     
 # Create cgroup mount points for process groups
     mkdir /dev/cpuctl
@@ -167,91 +135,59 @@ loglevel 3
 
 
 on fs
-						# mount mtd partitions
-						    chmod 0755 /sbin/ext4-fix.sh
-						    start ext4-fix
-						    mount rfs /dev/stl9 /system check=no
-						    mount ext4 /dev/stl9 /system wait rw
+    #mount mtd partitions
+    chmod 0755 /sbin/ext4-fix.sh
+    start ext4-fix
+    mount rfs /dev/stl9 /system check=no
+    mount ext4 /dev/stl9 /system wait rw
 
-						## for LogMeIn (for customer VOP)
-						    chown root root /system/bin/RescueStarter
-						    chmod 0755 /system/bin/RescueStarter
-						    chown root root /system/bin/RescueServer
-						    chmod 0755 /system/bin/RescueServer
-		
-						#   mount rfs /dev/stl11 /data nosuid nodev check=no
-						    mount rfs /dev/stl10 /cache nosuid nodev
-						    mount ext4 /dev/stl10 /cache wait nosuid nodev
-						    mount rfs /dev/stl9 /system ro remount
-						    mount ext4 /dev/stl9 /system wait ro remount
+	
+    mount rfs /dev/stl11 /data nosuid nodev check=no
+    mount ext4 /dev/stl11 /data wait nosuid nodev
+    mount rfs /dev/stl10 /cache nosuid nodev
+    mount ext4 /dev/stl10 /cache wait nosuid nodev
+    mount rfs /dev/stl9 /system ro remount
+    mount ext4 /dev/stl9 /system wait ro remount
 						    
-						#J4FS module
-						    insmod /lib/modules/j4fs.ko
+    #J4FS module
+    insmod /lib/modules/j4fs.ko
+    mount j4fs /dev/stl6 /mnt/.lfs 
+						
+    #/*ASW3 YONG_ODE_START*/
+    # We chown/chmod /efs again so because mount is run as root + defaults
+    mount rfs /dev/stl12 /efs nosuid nodev check=no    
 
-						    mount j4fs /dev/stl6 /mnt/.lfs 
-						#/*ASW3 YONG_ODE_START*/
+    # SEC_DMCRYPT for MC_CRYPT_ROOT before apply_disk_policy or apply_sec_devenc_init
+    chown radio system /efs
+    chmod 0771 /efs
+    # SEC_DMCRYPT efs or cache or lfs partition required
+    exec apply_sec_devenc_init
 
-						# We chown/chmod /efs again so because mount is run as root + defaults
-						mount rfs /dev/stl12 /efs nosuid nodev check=no    
+# use movinand second partition as /data. d.moskvitin
+    #temp
+    chown root root /sbin/fat.format
+    chmod 750 /sbin/fat.format
 
-						# SEC_DMCRYPT for MC_CRYPT_ROOT before apply_disk_policy or apply_sec_devenc_init
-						chown radio system /efs
-						chmod 0771 /efs
+    # We chown/chmod /data again so because mount is run as root + defaults
+    mount rfs /dev/stl11 /data nosuid nodev crypt check=no
+    mount ext4 /dev/stl11 /data wait nosuid nodev
+    chown system system /data
+    chmod 0771 /data    
 
-						    # SEC_DMCRYPT efs or cache or lfs partition required
-						    exec apply_sec_devenc_init
+    #SEC_PARAM
+    insmod /lib/modules/sec_param.ko
 
-						# use movinand second partition as /data. d.moskvitin
-						    #temp
-						    chown root root /sbin/fat.format
-						    chmod 750 /sbin/fat.format
+    # don't require sim
+    setprop keyguard.no_require_sim 1
 
+on post-fs
+    # once everything is setup, no need to modify /
+    mount rootfs rootfs / rw remount
 
-						# SEC_SECURITYLAB_LATONA_DEVICE_ENCRYPTION: add crypt option
-						# We chown/chmod /data again so because mount is run as root + defaults
+    # We chown/chmod /data again so because mount is run as root + defaults
+    chown system system /data
+    chmod 0771 /data
 
-						    mount rfs /dev/stl11 /data nosuid nodev crypt check=no
-						    mount ext4 /dev/stl11 /data wait nosuid nodev
-						    chown system system /data
-						    chmod 0771 /data    
-
-						#/*ASW3 YONG_ODE_END*/
-
-						#SEC_PARAM
-						   insmod /lib/modules/sec_param.ko
-
-						#	write /sys/block/stl12/queue/read_ahead_kb 4
-						#	write /sys/block/stl13/queue/read_ahead_kb 4
-						#	write /sys/block/stl14/queue/read_ahead_kb 4
-						#	write /sys/devices/virtual/block/stl12/queue/read_ahead_kb 4
-						#	write /sys/devices/virtual/block/stl13/queue/read_ahead_kb 4
-						#	write /sys/devices/virtual/block/stl14/queue/read_ahead_kb 4
-
-						    # don't require sim
-						    setprop keyguard.no_require_sim 1
-
-						#on emmc-fs
-						## mount mmc partitions
-						#    wait /dev/block/mmcblk0p12
-						#    mount ext4 /dev/block/mmcblk0p12 /system ro barrier=1
-						#    wait /dev/block/mmcblk0p13
-						#    exec /system/bin/e2fsck -p /dev/block/mmcblk0p13
-						#    mount ext4 /dev/block/mmcblk0p13 /data nosuid nodev barrier=1 noauto_da_alloc
-						#    mount ext4 /dev/block/mmcblk0p14 /persist nosuid nodev barrier=1
-						#    mount ext4 /dev/block/mmcblk0p15 /cache nosuid nodev barrier=1
-
-						on post-fs
-						    # once everything is setup, no need to modify /
-						    mount rootfs rootfs / rw remount
-
-						    # We chown/chmod /data again so because mount is run as root + defaults
-						    chown system system /data
-						    chmod 0771 /data
-
-						#    # Mounting of persist is moved to 'on emmc-fs' and 'on fs' sections
-						#    # We chown/chmod /persist again so because mount is run as root + defaults
-						#    chown system system /persist
-						#    chmod 0771 /persist
     # Create dump dir and collect dumps.
     # Do this before we mount cache so eventually we can use cache for
     # storing dumps on platforms which do not have a dedicated dump partition.
@@ -293,7 +229,7 @@ on fs
     chown root system /proc/sysrq-trigger
     chmod 0220 /proc/sysrq-trigger
 
-# create basic filesystem structure
+    # create basic filesystem structure
     mkdir /data/misc 01771 system misc
     mkdir /data/misc/bluetoothd 0770 bluetooth bluetooth
     mkdir /data/misc/bluetooth 0770 system system
@@ -301,7 +237,6 @@ on fs
     mkdir /data/misc/vpn 0770 system system
     mkdir /data/misc/systemkeys 0700 system system
     mkdir /data/misc/vpn/profiles 0770 system system
-    # give system access to wpa_supplicant.conf for backup and restore
     mkdir /data/misc/wifi 0770 wifi wifi
     chmod 0770 /data/misc/wifi
     chmod 0660 /data/misc/wifi/wpa_supplicant.conf
@@ -353,20 +288,19 @@ on fs
     chmod 0660 /dev/ledflash
 
 on boot
-# basic network init
+    # basic network init
     ifup lo
     hostname localhost
     domainname localdomain
 
-# set RLIMIT_NICE to allow priorities from 19 to -20
+    # set RLIMIT_NICE to allow priorities from 19 to -20
     setrlimit 13 40 40
 
-# bootsnd
+    # bootsnd
     setprop audioflinger.bootsnd 1
-# end of bootsnd
 
-# Define the oom_adj values for the classes of processes that can be
-# killed by the kernel.  These are used in ActivityManagerService.
+    # Define the oom_adj values for the classes of processes that can be
+    # killed by the kernel.  These are used in ActivityManagerService.
     setprop ro.FOREGROUND_APP_ADJ 0
     setprop ro.VISIBLE_APP_ADJ 1
     setprop ro.PERCEPTIBLE_APP_ADJ 2
@@ -377,8 +311,8 @@ on boot
     setprop ro.HIDDEN_APP_MIN_ADJ 7
     setprop ro.EMPTY_APP_ADJ 15
 
-# Define the memory thresholds at which the above process classes will
-# be killed.  These numbers are in pages (4k).
+    # Define the memory thresholds at which the above process classes will
+    # be killed.  These numbers are in pages (4k).
     setprop ro.FOREGROUND_APP_MEM 2048
     setprop ro.VISIBLE_APP_MEM 3072
     setprop ro.PERCEPTIBLE_APP_MEM 4096
@@ -389,10 +323,10 @@ on boot
     setprop ro.HIDDEN_APP_MEM 7168
     setprop ro.EMPTY_APP_MEM 8192
 
-# Write value must be consistent with the above properties.
-# Note that the driver only supports 6 slots, so we have combined some of
-# the classes into the same memory level; the associated processes of higher
-# classes will still be killed first.
+    # Write value must be consistent with the above properties.
+    # Note that the driver only supports 6 slots, so we have combined some of
+    # the classes into the same memory level; the associated processes of higher
+    # classes will still be killed first.
     write /sys/module/lowmemorykiller/parameters/adj 0,1,2,4,7,15
 
     write /proc/sys/vm/overcommit_memory 1
@@ -452,21 +386,20 @@ on boot
     chown system system /proc/dump_enable
     chown system system /proc/silent
 
-#    # for multi csc
+    # for multi csc
     chown radio radio /proc/LinuStoreIII/efs_info 
     chmod 0664 /proc/LinuStoreIII/efs_info
-#    # for protecting key string
+    # for protecting key string
     chown radio radio /proc/LinuStoreIII/keystr 
     chmod 0664 /proc/LinuStoreIII/keystr
-#    # for ril_prop
+    # for ril_prop
     chown radio radio /proc/LinuStoreIII/ril_prop 
     chmod 0664 /proc/LinuStoreIII/ril_prop
-#    # for fsbuild_check
+    # for fsbuild_check
     chown radio radio /proc/LinuStoreIII/fsbuild_check 
     chmod 0664 /proc/LinuStoreIII/fsbuild_check
 
-
-# sound text data file
+    # sound text data file
     chmod 0777 /data/soundbooster.txt
     chmod 0777 /data/aeqcoe.txt
     chmod 0777 /data/lmfilter.txt
@@ -476,63 +409,64 @@ on boot
     chmod 0777 /data/stream_speaker.txt
     chmod 0777 /data/srstunning.txt    
 
-#snamy.jeong@samsung.com_110502 loopback test mode.
+    # Snamy.jeong@samsung.com_110502 loopback test mode.
     chmod 0666 /dev/bcm_alsa_pcg
 
-# for Dump On/Off
-	chmod 0777 /data/dump_enable
+    # for Dump On/Off
+    chmod 0777 /data/dump_enable
 
-## MAX8899 headset detect 
-#	chown radio system /sys/class/switch/h2w/state
+    # Force Power Down
+    chmod 0660 /sys/class/sec/pm/power_down
+    chown root system /sys/class/sec/pm/power_down
 
-# Force Power Down
-	chmod 0660 /sys/class/sec/pm/power_down
-	chown root system /sys/class/sec/pm/power_down
-# CPU Governor
-	chmod 0660 /sys/class/sec/cpu/cpu_gov
-	chown root system /sys/class/sec/cpu/cpu_gov
+    # CPU Governor
+    chmod 0660 /sys/class/sec/cpu/cpu_gov
+    chown root system /sys/class/sec/cpu/cpu_gov
 	
-## for YAMAHA geomagnetic sensor
-#accelerometer
-	chown system input /sys/class/input/input3/enable
-	chown system input /sys/class/input/input3/delay
-	chown system input /sys/class/input/input3/wake
-#geomagnetic
-	chown system input /sys/class/input/input1/enable
-	chown system input /sys/class/input/input1/delay
-	chown system input /sys/class/input/input1/wake
-#geomagnetic_raw
-	chown compass input /sys/class/input/input2/offsets
-#orientation
-	chown system input /sys/class/input/input4/enable
-	chown system input /sys/class/input/input4/delay
-	chown system input /sys/class/input/input4/wake
-#gyro
-#	chown system input /sys/class/input/input6/enable
-#	chown system input /sys/class/input/input6/delay
-#	chown system input /sys/class/input/input6/wake
+    # Accelerometer
+    chown system input /sys/class/input/input3/enable
+    chown system input /sys/class/input/input3/delay
+    chown system input /sys/class/input/input3/wake
 
-## sensor mounting direction
-#accelerometer
-	write /sys/class/input/input3/position 3
-#geomagnetic
-	write /sys/class/input/input1/position 0
+    # Geomagnetic
+    chown system input /sys/class/input/input1/enable
+    chown system input /sys/class/input/input1/delay
+    chown system input /sys/class/input/input1/wake
+    chown compass input /sys/class/input/input2/offsets
 
-# waketime CSP461560
+    # Orientation
+    chown system input /sys/class/input/input4/enable
+    chown system input /sys/class/input/input4/delay
+    chown system input /sys/class/input/input4/wake
+
+    # Gyrosocpe
+    #chown system input /sys/class/input/input6/enable
+    #chown system input /sys/class/input/input6/delay
+    #chown system input /sys/class/input/input6/wake
+
+    # Sensor mounting direction
+
+    # Accelerometer
+    write /sys/class/input/input3/position 3
+
+    # Geomagnetic
+    write /sys/class/input/input1/position 0
+
+    # waketime CSP461560
     chown radio system /sys/module/bcm_fuse_net/parameters/pdp_waketime
 
-#set correct BT adress
+    # Set correct BT adress
     setprop ro.bt.bdaddr_path "/data/misc/bluetooth/.nvmac_bt.info"
 
-# Define TCP buffer sizes for various networks
-#   ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
+    # Define TCP buffer sizes for various networks
+    # ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
     setprop net.tcp.buffersize.default 4096,87380,196608,4096,16384,110208
     setprop net.tcp.buffersize.wifi    4095,87380,393216,4096,16384,110208
     setprop net.tcp.buffersize.umts    4094,87380,196608,4096,16384,110208
     setprop net.tcp.buffersize.edge    4093,26280,35040,4096,16384,35040
     setprop net.tcp.buffersize.gprs    4092,8760,11680,4096,8760,11680
 
-# Define broadcom bluetooth properties
+    # Define broadcom bluetooth properties
     setprop service.brcm.bt.activation 0
     setprop service.brcm.bt.btld 0
     setprop service.brcm.bt.btld_pid 0
@@ -540,30 +474,29 @@ on boot
     setprop service.brcm.bt.is_sta 0
     setprop service.brcm.bt.srv_active 0 
 
-# Define broadcom gps properties 
+    # Define broadcom gps properties 
     setprop gps.fd.block "false"
 
-## for datarouter
-#    chown system system /dev/ttygs0
-#    chown system system /dev/dun    
+    # DataRouter
+    #chown system system /dev/ttygs0
+    #chown system system /dev/dun    
 
     start sysinit
     
-chmod 0755 /sbin/busybox
+    chmod 0755 /sbin/busybox
 
     import /system/etc/init.local.rc
 
-# Patch
+    # Patch
     start bootscript
 
-on property:boot.ready=1
+    on property:boot.ready=1
     stop bootscript
 
     class_start default
 
 
 ## Daemon processes to be run by init.
-##
 service ext4-fix /sbin/ext4-fix.sh
     user root
     oneshot
@@ -576,13 +509,6 @@ service bootscript /sbin/bootscript.sh
 
 service ueventd /sbin/ueventd
     critical
-
-# Block this to change UART default mode : console -> AT parser
-#service console /system/bin/sh
-#    console
-#    disabled
-#    user shell
-#    group log
 
 on property:ro.secure=0
     start console
@@ -618,7 +544,7 @@ service servicemanager /system/bin/servicemanager
 # SEC_GA_BOOTSOUND	
 service playsound /system/bin/playsound
     user media
-	group system
+    group system
     oneshot
 
 service vold /system/bin/vold
@@ -628,7 +554,7 @@ service vold /system/bin/vold
 
 service netd /system/bin/netd
     socket netd stream 0660 root system
-	socket dnsproxyd stream 0660 root inet
+    socket dnsproxyd stream 0660 root inet
 
 service debuggerd /system/bin/debuggerd
 
@@ -642,10 +568,6 @@ service ril-daemon /system/bin/rild
 #service DR-daemon /system/bin/drexe
 #    user root
 #    group system radio inet net_raw
-
-#service gps-daemon /system/bin/gpsd
-#    user system
-#    group system inet
 
 service mobex-daemon /system/bin/npsmobex
     user system
@@ -681,9 +603,6 @@ service dbus /system/bin/dbus-daemon --system --nofork
 service installd /system/bin/installd
     socket installd stream 600 system system
 
-#service flash_recovery /system/etc/install-recovery.sh
-#    oneshot
-
 service racoon /system/bin/racoon
     socket racoon stream 600 system system
     # racoon will setuid to vpn after getting necessary resources.
@@ -708,44 +627,35 @@ service dumpstate /system/bin/dumpstate -s
     disabled
     oneshot
 
-#service dhcp-service /system/bin/netcfg eth0 dhcp
-#        oneshot
-#
+service dhcp-service /system/bin/netcfg eth0 dhcp
+    oneshot
+
 on property:dev.bootcomplete=1
-        stop dhcp-service
-        start dhcp-service
+    stop dhcp-service
+    start dhcp-service
 
 service iprenew_eth0 /system/bin/dhcpcd -n
     disabled
     oneshot
 
-#service logcat /system/bin/logcat -v time -b radio -f /dev/null
-#    oneshot
-
-#/*ASW3 YONG_ODE_START*/
-###### Device Encryption - init_wtl_data.rc
+# Device Encryption - init_wtl_data.rc
 on property:encryption.bootmode=remount
     stop mobex-daemon
     # stop DR-deamon     
     # stop tvout
-    #stop dfta
+    # stop dfta
     stop media
     stop immvibed
     stop zygote
 
     # do not add here, "on property" tag area
 
-####### data check 
+# Check data
     # do not add here, "on property" tag area
-    # mount rfs /dev/block/mmcblk0p3 /data nosuid nodev usedm check=no,iocharset=utf8
-    # mount yaffs2 mtd@userdata /data nosuid nodev
     mount rfs /dev/stl11 /data nosuid nodev usedm check=no
     mount ext4 /dev/stl11 /data wait nosuid nodev
     chown system system /data
     chmod 0771 /data
-
-# must add remount data about /data /*ASW3 YONG_ODE*/
-
 
     # once everything is setup, no need to modify /
     mount rootfs rootfs / ro remount
@@ -754,15 +664,9 @@ on property:encryption.bootmode=remount
     chown system system /data
     chmod 0771 /data
 
-#    # Mounting of persist is moved to 'on emmc-fs' and 'on fs' sections
-#    # We chown/chmod /persist again so because mount is run as root + defaults
-#    chown system system /persist
-#    chmod 0771 /persist
-
     # Create dump dir and collect dumps.
     # Do this before we mount cache so eventually we can use cache for
-    # storing dumps on platforms which do not have a dedicated dump partition.
-   
+    # storing dumps on platforms which do not have a dedicated dump partition.  
     mkdir /data/dontpanic
     chown root log /data/dontpanic
     chmod 0750 /data/dontpanic
@@ -817,34 +721,18 @@ on property:encryption.bootmode=remount
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/radionv 0770 radio system
     chmod 0770 /data/misc/radionv
-#    mkdir /data/misc/wifi/sockets 0770 wifi wifi
-#    mkdir /data/misc/wifi/wpa_supplicant 0770 wifi wifi
     chmod 0770 /data/misc/wifi
     chmod 0660 /data/misc/wifi/wpa_supplicant.conf
-#    mkdir /data/misc/dhcp 0770 dhcp dhcp
-#    mkdir /data/misc/wifi/hostapd 0770 wifi wifi
-#    chown system system /sys/devices/platform/lcdc_s6d04h0a_qvga.0/lcd_power
-#    chmod 0660 /sys/devices/platform/lcdc_s6d04h0a_qvga.0/lcd_power
-#    chown system system /sys/devices/platform/msm_sdcc.1/detect_change
-#    chown system system /sys/devices/platform/msm_sdcc.2/detect_change
-#    chown system system /sys/devices/platform/msm_sdcc.3/detect_change
-#    chown system system /sys/devices/platform/msm_sdcc.4/detect_change
-#	chown system radio /sys/devices/platform/msm-battery/power_supply/battery/talk_gsm
-#	chown system radio /sys/devices/platform/msm-battery/power_supply/battery/talk_wcdma
     mkdir /data/local 0771 shell shell
     mkdir /data/local/tmp 0771 shell shell
     mkdir /data/data 0771 system system
     mkdir /data/app-private 0771 system system
     mkdir /data/app 0771 system system
     mkdir /data/property 0700 root root
-#    mkdir /data/radio 0770 radio radio
-#    mkdir /data/misc/radio 0770 radio radio
-#    mkdir /data/misc/sensors 0777 system misc
 
     # create log system 
     mkdir /data/log 0777 system system
     chmod 0777 /data/log
-
 
     # Create directory for FOTA 
     mkdir /data/fota 0777 system system
@@ -879,6 +767,7 @@ on property:encryption.bootmode=remount
     # For MMI Checker
     mkdir /data/dfta 0777 system system
 
+############################## SEARCH FILTER: WIP
 # k.moon.kim_2011.7.10 'reload properties for ODE 
     exec reload_data_partition_properties
 
@@ -892,26 +781,12 @@ on property:encryption.bootmode=remount
  #   start DR-deamon
     start mobex-daemon 
     
-## for LogMeIn (for customer VOP)
-#   chown root root /system/bin/RescueStarter
-#   chmod 0755 /system/bin/RescueStarter
-#   chown root root /system/bin/RescueServer
-#   chmod 0755 /system/bin/RescueServer
-
-service RescueStarter /system/bin/RescueStarter
-    user nobody
-    group input graphics
-    oneshot
-    
-## for YAMAHA geomagnetic sensor
+############################## SEARCH FILTER: WIP
+# Geomagnetic sensor
 service orientationd /system/bin/orientationd
-	user compass
-	group input
+    user compass
+    group input
 
 service geomagneticd /system/bin/geomagneticd
-	user compass
-	group system input
-    
-######### End of LogMeIn #########
-
-#/*ASW3 YONG_ODE_END*/
+    user compass
+    group system input
