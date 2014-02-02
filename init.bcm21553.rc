@@ -157,7 +157,6 @@ on boot
     chmod 0777 /data/vt/testplay.jpg
     chmod 0777 /data/vt/testplay.bmp
     chmod 0777 /mnt/sdcard/vt
-#    chmod 0777 /dev/pmem_adsp
 
     # Use misc partition for flash OTP access
     chown root radio /dev/mtd/mtd9
@@ -242,17 +241,6 @@ service dhcpcd_eth0 /system/bin/dhcpcd
     oneshot
 
 service iprenew_eth0 /system/bin/dhcpcd -n
-    disabled
-    oneshot
-
-# for WiFi MFG(TestMode)
-service mfgloader /system/bin/mfgloader
-    disabled
-    oneshot
-
-service wlandutservice /system/bin/wlandutservice
-    user system
-    group wifi net_raw net_admin system inet
     disabled
     oneshot
 
