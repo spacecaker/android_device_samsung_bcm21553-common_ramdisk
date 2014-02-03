@@ -647,7 +647,6 @@ on property:encryption.bootmode=remount
 
 # Check data
     # do not add here, "on property" tag area
-    mount rfs /dev/stl11 /data nosuid nodev usedm check=no
     mount ext4 /dev/stl11 /data wait nosuid nodev
     chown system system /data
     chmod 0771 /data
