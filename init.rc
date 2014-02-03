@@ -106,11 +106,11 @@ loglevel 3
     chown radio system /dev/radionv
     chmod 0770 /dev/radionv
 
-# FSR module
+    # FSR module
     insmod /lib/modules/fsr.ko
     insmod /lib/modules/fsr_stl.ko
 
-# RFS module
+    # RFS module
     insmod /lib/modules/rfs_glue.ko
     insmod /lib/modules/rfs_fat.ko
 
@@ -130,24 +130,17 @@ loglevel 3
     chmod 0770 /dev/bml14
     chmod 0770 /dev/bml15
     
-#    bml15 nv partition
+    # bml15 nv partition
     chown radio system /dev/bml15
 
 
 on fs
-    #mount mtd partitions
+    # Mount mtd partitions
     chmod 0755 /sbin/ext4-fix.sh
     start ext4-fix
-    mount rfs /dev/stl9 /system check=no
-    mount ext4 /dev/stl9 /system wait rw
-
-	
-    mount rfs /dev/stl11 /data nosuid nodev check=no
-    mount ext4 /dev/stl11 /data wait nosuid nodev
-    mount rfs /dev/stl10 /cache nosuid nodev
-    mount ext4 /dev/stl10 /cache wait nosuid nodev
-    mount rfs /dev/stl9 /system ro remount
     mount ext4 /dev/stl9 /system wait ro remount
+    mount ext4 /dev/stl11 /data wait nosuid nodev
+    mount ext4 /dev/stl10 /cache wait nosuid nodev
 						    
     #J4FS module
     insmod /lib/modules/j4fs.ko
@@ -169,7 +162,6 @@ on fs
     chmod 750 /sbin/fat.format
 
     # We chown/chmod /data again so because mount is run as root + defaults
-    mount rfs /dev/stl11 /data nosuid nodev crypt check=no
     mount ext4 /dev/stl11 /data wait nosuid nodev
     chown system system /data
     chmod 0771 /data    
@@ -389,12 +381,15 @@ on boot
     # for multi csc
     chown radio radio /proc/LinuStoreIII/efs_info 
     chmod 0664 /proc/LinuStoreIII/efs_info
+    
     # for protecting key string
     chown radio radio /proc/LinuStoreIII/keystr 
     chmod 0664 /proc/LinuStoreIII/keystr
+    
     # for ril_prop
     chown radio radio /proc/LinuStoreIII/ril_prop 
     chmod 0664 /proc/LinuStoreIII/ril_prop
+    
     # for fsbuild_check
     chown radio radio /proc/LinuStoreIII/fsbuild_check 
     chmod 0664 /proc/LinuStoreIII/fsbuild_check
