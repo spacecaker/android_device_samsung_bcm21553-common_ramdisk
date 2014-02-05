@@ -1,7 +1,6 @@
 on post-fs
 
-# Sensors
-    
+    # Sensors 
     mkdir /data/misc/sensors 0777 system misc
 
     chown root system /dev/mmc328x
@@ -46,7 +45,7 @@ on boot
     chown system system /dev/ttyS0
     chown system system /sys/module/bcm215xx_pm/parameters/debug
 
-# For ASE application
+    # For ASE application
     mkdir /data/brcm
     mkdir /data/brcm/ase
     mkdir /data/brcm/ase/extras
@@ -69,19 +68,19 @@ on boot
     chmod 0777 /data/brcm/ase/scripts/atmode.sh
     chmod 0777 /data/brcm/ase/scripts/usbconfig.sh
 
-# For kexec
+    # For kexec
     chmod 755 /system/bin/kexec
     chmod 0771 /data
     chmod 0777 /data/kexec.sh
 
-# runSysCmd
+    # runSysCmd
     mkdir /data/misc/utils 0777
     chown system system /data/misc/utils
 
-# permisssion for cache-ops
+    # Permisssion for cache-ops
     chmod 0666 /dev/cache-ops 
 
-# DHCP Service init
+    # DHCP Service init
     setprop wifi.interface "eth0"
 
     mkdir /system/etc/wifi 0770 wifi wifi
@@ -89,7 +88,6 @@ on boot
     chmod 0777 /system/etc/wifi/wpa_supplicant.conf
     chown wifi wifi /system/etc/wifi/wpa_supplicant.conf
 
-    #wpa_supplicant control socket for android wifi.c (android private socket)
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     chmod 0775 /data/misc/wifi/sockets
@@ -100,12 +98,10 @@ on boot
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
     chmod 0775 /data/misc/dhcp
-
-    # Let wifi control BT_VREG_CTL GPIO
     chown wifi wifi /sys/class/gpio/gpio21/value
     chmod 0664 /sys/class/gpio/gpio21/value
 
-# Bluetooth
+    # Bluetooth
     chown root bluetooth /dev/ttyS1
     chmod 0660 /dev/ttyS1
     chown root bluetooth /sys/class/rfkill/rfkill0
@@ -118,13 +114,11 @@ on boot
     chown root bluetooth /sys/class/sound/controlC0/FMDirectPlay
 
     setprop service.brcm.bt.pbap_mode btld
-
     chown system bluetooth /data/local.prop
-
     setprop ro.bt.bdaddr_path "/data/misc/bluetooth/.nvmac_bt.info"
-    chmod 0660 ro.bt.bdaddr_path
+    chmod 0775 ro.bt.bdaddr_path
 
-# GPS
+    # GPS
     chown gps system /dev/ttyS2
 
     write /sys/class/gpio/export 56
@@ -142,7 +136,7 @@ on boot
     chown gps system /dev/bcm_gps
     chown gps system /dev/bcm_cntin
 
-# VT config
+    # VT config
     mkdir /data/vt 0777
     chmod 0777 /system/etc/vt/3g324mConfig.val
     chmod 0777 /system/etc/vt/testplay.3gp
@@ -157,7 +151,6 @@ on boot
     chmod 0777 /data/vt/testplay.jpg
     chmod 0777 /data/vt/testplay.bmp
     chmod 0777 /mnt/sdcard/vt
-#    chmod 0777 /dev/pmem_adsp
 
     # Use misc partition for flash OTP access
     chown root radio /dev/mtd/mtd9
