@@ -38,6 +38,15 @@ on boot
     chmod 0660 /dev/bcm_alsa_voip
     chown radio system /dev/bcm_alsa_voip
     chmod 0666 /dev/v3d
+
+    insmod /system/lib/modules/memalloc.ko
+    insmod /system/lib/modules/hx170dec.ko
+    insmod /system/lib/modules/h6270enc.ko
+    insmod /system/lib/modules/gememalloc.ko
+    insmod /system/lib/modules/ge_drv.ko
+    insmod /system/lib/modules/brcm_switch.ko
+    insmod /system/lib/modules/bcm_headsetsw.ko
+
     chmod 0777 /dev/camera
     chown system system /sys/bcm/cache
     chmod 0771 /dev/ttyGS0
