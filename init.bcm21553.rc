@@ -1,23 +1,30 @@
 on post-fs
-   # Sensors
+
+# Sensors
+    
     mkdir /data/misc/sensors 0777 system misc
+
     chown root system /dev/mmc328x
     chown root system /dev/ecompass_ctrl
     chown root system /dev/bma222
     chown root system /dev/proximity
+    
     chmod 0660 /dev/mmc328x
     chmod 0660 /dev/ecompass_ctrl
     chmod 0660 /dev/bma222
     chmod 0660 /dev/proximity
+
     chmod 0660 /data/misc/sensors/ecs_nvm
     chmod 0660 /data/misc/sensors/accel_offset
-    
+
     chown system system /sys/class/input/input0/enable
     chown system system /sys/class/input/input0/poll_delay
     chmod 0660 /sys/class/input/input0/enable
     chmod 0660 /sys/class/input/input0/poll_delay
 
+
 on boot
+
     chown system system /sys/class/backlight/aat1401-backlight/brightness
     chown system system /sys/class/backlight/pwm-keypad-backlight.0/brightness
     chown system camera /sys/class/camera/camera/camflash
@@ -39,7 +46,7 @@ on boot
     chown system system /dev/ttyS0
     chown system system /sys/module/bcm215xx_pm/parameters/debug
 
-    # For ASE application
+# For ASE application
     mkdir /data/brcm
     mkdir /data/brcm/ase
     mkdir /data/brcm/ase/extras
@@ -48,7 +55,6 @@ on boot
     chmod 0777 /data/brcm/ase
     chmod 0777 /data/brcm/ase/extras
     chmod 0777 /data/brcm/ase/scripts
-    
     copy /system/etc/adb.sh /data/brcm/ase/scripts/adb.sh
     copy /system/etc/rndis.sh /data/brcm/ase/scripts/rndis.sh
     copy /system/etc/logcfg.sh /data/brcm/ase/scripts/logcfg.sh
@@ -63,24 +69,27 @@ on boot
     chmod 0777 /data/brcm/ase/scripts/atmode.sh
     chmod 0777 /data/brcm/ase/scripts/usbconfig.sh
 
-    # For kexec
+# For kexec
     chmod 755 /system/bin/kexec
     chmod 0771 /data
     chmod 0777 /data/kexec.sh
 
-    # RunSysCmd
+# runSysCmd
     mkdir /data/misc/utils 0777
     chown system system /data/misc/utils
 
-    # Permisssion for cache-ops
+# permisssion for cache-ops
     chmod 0666 /dev/cache-ops 
 
-    # DHCP Service init
+# DHCP Service init
     setprop wifi.interface "eth0"
+
     mkdir /system/etc/wifi 0770 wifi wifi
     chmod 0777 /system/etc/wifi
     chmod 0777 /system/etc/wifi/wpa_supplicant.conf
     chown wifi wifi /system/etc/wifi/wpa_supplicant.conf
+
+    #wpa_supplicant control socket for android wifi.c (android private socket)
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     chmod 0775 /data/misc/wifi/sockets
@@ -92,10 +101,11 @@ on boot
     chown dhcp dhcp /data/misc/dhcp
     chmod 0775 /data/misc/dhcp
 
+    # Let wifi control BT_VREG_CTL GPIO
     chown wifi wifi /sys/class/gpio/gpio21/value
     chmod 0664 /sys/class/gpio/gpio21/value
 
-    # Bluetooth
+# Bluetooth
     chown root bluetooth /dev/ttyS1
     chmod 0660 /dev/ttyS1
     chown root bluetooth /sys/class/rfkill/rfkill0
@@ -114,13 +124,15 @@ on boot
     setprop ro.bt.bdaddr_path "/data/misc/bluetooth/.nvmac_bt.info"
     chmod 0660 ro.bt.bdaddr_path
 
-    # GPS
+# GPS
     chown gps system /dev/ttyS2
+
     write /sys/class/gpio/export 56
     chown gps system /sys/class/gpio/gpio56/value
     chown gps system /sys/class/gpio/gpio56/direction
     write /sys/class/gpio/gpio56/value 0
     write /sys/class/gpio/gpio56/direction out
+
     write /sys/class/gpio/export 23
     chown gps system /sys/class/gpio/gpio23/value
     chown gps system /sys/class/gpio/gpio23/direction
@@ -130,14 +142,12 @@ on boot
     chown gps system /dev/bcm_gps
     chown gps system /dev/bcm_cntin
 
-    # VT config
+# VT config
     mkdir /data/vt 0777
     chmod 0777 /system/etc/vt/3g324mConfig.val
     chmod 0777 /system/etc/vt/testplay.3gp
     chmod 0777 /system/etc/vt/testplay.jpg
     chmod 0777 /system/etc/vt/testplay.bmp
-    
-    ########## WIP, can be deleted?
     copy /system/etc/vt/3g324mConfig.val /data/vt/3g324mConfig.val
     copy /system/etc/vt/testplay.3gp /data/vt/testplay.3gp
     copy /system/etc/vt/testplay.jpg /data/vt/testplay.jpg
@@ -147,12 +157,13 @@ on boot
     chmod 0777 /data/vt/testplay.jpg
     chmod 0777 /data/vt/testplay.bmp
     chmod 0777 /mnt/sdcard/vt
+#    chmod 0777 /dev/pmem_adsp
 
     # Use misc partition for flash OTP access
     chown root radio /dev/mtd/mtd9
     chmod 0640 /dev/mtd/mtd9
 
-# SERVICES
+
 # Rename apanic files with timestamp
 service ap_log_ren /system/bin/sh /system/etc/apanic_rename.sh
     oneshot
@@ -173,8 +184,7 @@ service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -d -n
     socket dbus_bluetooth stream 660 bluetooth bluetooth
     group bluetooth net_bt_admin misc
     disabled
-    
-################ SEARCH FILTER: WIP can't be deleted?
+
 service hfag /system/bin/sdptool add --channel=10 HFAG
     user bluetooth
     group bluetooth net_bt_admin
@@ -232,6 +242,17 @@ service dhcpcd_eth0 /system/bin/dhcpcd
     oneshot
 
 service iprenew_eth0 /system/bin/dhcpcd -n
+    disabled
+    oneshot
+
+# for WiFi MFG(TestMode)
+service mfgloader /system/bin/mfgloader
+    disabled
+    oneshot
+
+service wlandutservice /system/bin/wlandutservice
+    user system
+    group wifi net_raw net_admin system inet
     disabled
     oneshot
 

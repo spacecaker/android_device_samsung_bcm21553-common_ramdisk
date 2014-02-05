@@ -18,6 +18,7 @@ on init
     mount /tmp /tmp tmpfs   
 
 on early-fs
+
     # rfs drivers
     insmod /lib/modules/fsr.ko
     insmod /lib/modules/fsr_stl.ko
@@ -29,10 +30,13 @@ on fs
     mount tmpfs tmpfs /tmp
     chmod 0755 /sbin/ext4-fix.sh
     start ext4-fix
-    mount ext4 /dev/stl10 /cache nosuid nodev noatime wait errors=panic
-    mount rfs /dev/stl10 /cache nosuid nodev
+
+    mount ext4 /dev/stl9 /system wait rw
+    mount ext4 /dev/stl10 /cache wait nosuid nodev
+    mount ext4 /dev/stl9 /system wait ro remount
 
 on post-fs
+
     write /proc/sys/kernel/panic_on_oops 1
     write /proc/sys/kernel/hung_task_timeout_secs 0
     write /proc/cpu/alignment 4
@@ -41,8 +45,8 @@ on post-fs
     write /proc/sys/kernel/sched_compat_yield 1
     write /proc/sys/kernel/sched_child_runs_first 0
     write /proc/LinuStoreIII/fsbuild_check BUILDING
-
 on boot
+
     ifup lo
     hostname localhost
     domainname localdomain
@@ -53,7 +57,7 @@ on boot
 on property:rev-install.ready=1
     stop rev-install
 
-class_start default
+    class_start default
     
 service ext4-fix /sbin/ext4-fix.sh
     user root
@@ -67,6 +71,9 @@ service rev-install /sbin/rev-install.sh
 
 service ueventd /sbin/ueventd
     critical
+
+#service console /system/bin/sh
+#    console
 
 service recovery /sbin/recovery
 
