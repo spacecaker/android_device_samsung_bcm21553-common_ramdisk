@@ -46,12 +46,11 @@ loglevel 3
     mkdir /cache 0770 system cache
     mkdir /config 0500 root root
 
-#/*ASW3 YONG_ODE_START*/ 
+    #/*ASW3 YONG_ODE_START*/ 
     mkdir /efs 0771 system system
     chown system system /efs
     chmod 0771 /efs
 
-#/*ASW3 YONG_ODE_END*/
     # Directory for putting things only root should see.
     mkdir /mnt/secure 0700 root root
 
@@ -138,12 +137,6 @@ on fs
     mount ext4 /dev/stl9 /system wait rw
     mount ext4 /dev/stl10 /cache wait nosuid nodev
     mount ext4 /dev/stl9 /system wait ro remount
-
-    ## for LogMeIn (for customer VOP)
-    chown root root /system/bin/RescueStarter
-    chmod 0755 /system/bin/RescueStarter
-    chown root root /system/bin/RescueServer
-    chmod 0755 /system/bin/RescueServer
  
     #J4FS module
     insmod /lib/modules/j4fs.ko
@@ -174,7 +167,7 @@ on fs
     #/*ASW3 YONG_ODE_END*/
 
     #SEC_PARAM
-   insmod /lib/modules/sec_param.ko
+    insmod /lib/modules/sec_param.ko
 
     # don't require sim
     setprop keyguard.no_require_sim 1
@@ -415,18 +408,7 @@ on boot
 
     # for fsbuild_check
     chown radio radio /proc/LinuStoreIII/fsbuild_check 
-    chmod 0664 /proc/LinuStoreIII/fsbuild_check
-
-
-    # sound text data file
-    chmod 0777 /data/soundbooster.txt
-    chmod 0777 /data/aeqcoe.txt
-    chmod 0777 /data/lmfilter.txt
-    chmod 0777 /data/eqfilter.txt
-    chmod 0777 /data/situation.txt
-    chmod 0777 /data/stream_headset.txt
-    chmod 0777 /data/stream_speaker.txt
-    chmod 0777 /data/srstunning.txt    
+    chmod 0664 /proc/LinuStoreIII/fsbuild_check   
 
     #snamy.jeong@samsung.com_110502 loopback test mode.
     chmod 0666 /dev/bcm_alsa_pcg
@@ -464,12 +446,10 @@ on boot
     #chown system input /sys/class/input/input6/delay
     #chown system input /sys/class/input/input6/wake
 
-    # Sensor mounting direction
-
     # Accelerometer
     write /sys/class/input/input3/position 3
-    # Geomagnetic
 
+    # Geomagnetic
     write /sys/class/input/input1/position 0
 
     # waketime CSP461560
@@ -617,9 +597,6 @@ service dbus /system/bin/dbus-daemon --system --nofork
 
 service installd /system/bin/installd
     socket installd stream 600 system system
-
-#service flash_recovery /system/etc/install-recovery.sh
-#    oneshot
 
 service racoon /system/bin/racoon
     socket racoon stream 600 system system
