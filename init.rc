@@ -389,6 +389,9 @@ on boot
     chown system system /sys/kernel/ipv4/tcp_rmem_def
     chown system system /sys/kernel/ipv4/tcp_rmem_max
     chown root radio /proc/cmdline
+    
+    # Camera Test Mode
+    chown radio system /sys/devices/virtual/camera/camera/camflash
 
     # for silent reset
     chown system system /proc/dump_enable
