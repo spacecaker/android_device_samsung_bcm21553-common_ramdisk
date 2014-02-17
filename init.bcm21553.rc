@@ -26,8 +26,6 @@ on boot
 
     chown system system /sys/class/backlight/aat1401-backlight/brightness
     chown system system /sys/class/backlight/pwm-keypad-backlight.0/brightness
-    chown system camera /sys/class/camera/camera/camflash
-    chmod 0660 /sys/class/camera/camera/camflash
 
     chmod 0660 /dev/bcm_kril
     chown root radio /dev/bcm_kril

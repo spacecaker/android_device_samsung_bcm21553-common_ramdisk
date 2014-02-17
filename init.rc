@@ -138,11 +138,9 @@ on fs
     mount ext4 /dev/stl10 /cache wait nosuid nodev
     mount ext4 /dev/stl9 /system wait ro remount
  
-    #J4FS module
+    # J4FS module
     insmod /lib/modules/j4fs.ko
     mount j4fs /dev/stl6 /mnt/.lfs 
-
-    #/*ASW3 YONG_ODE_START*/
 
     # We chown/chmod /efs again so because mount is run as root + defaults
     mount rfs /dev/stl12 /efs nosuid nodev check=no    
@@ -155,22 +153,16 @@ on fs
     exec apply_sec_devenc_init
 
     # use movinand second partition as /data. d.moskvitin
-    #temp
     chown root root /sbin/fat.format
     chmod 750 /sbin/fat.format
 
     # We chown/chmod /data again so because mount is run as root + defaults
     mount ext4 /dev/stl11 /data wait nosuid nodev
     chown system system /data
-    chmod 0771 /data    
+    chmod 0771 /data
 
-    #/*ASW3 YONG_ODE_END*/
-
-    #SEC_PARAM
+    # SEC_PARAM
     insmod /lib/modules/sec_param.ko
-
-    # don't require sim
-    setprop keyguard.no_require_sim 1
 
 on post-fs
     # once everything is setup, no need to modify /
@@ -179,32 +171,6 @@ on post-fs
     # We chown/chmod /data again so because mount is run as root + defaults
     chown system system /data
     chmod 0771 /data
-
-    # Create dump dir and collect dumps.
-    # Do this before we mount cache so eventually we can use cache for
-    # storing dumps on platforms which do not have a dedicated dump partition. 
-    mkdir /data/dontpanic
-    chown root log /data/dontpanic
-    chmod 0750 /data/dontpanic
-
-    # Collect apanic data, free resources and re-arm trigger
-    copy /proc/apanic_console /data/dontpanic/apanic_console
-    chown root log /data/dontpanic/apanic_console
-    chmod 0640 /data/dontpanic/apanic_console
-    copy /proc/apanic_threads /data/dontpanic/apanic_threads
-    chown root log /data/dontpanic/apanic_threads
-    chmod 0640 /data/dontpanic/apanic_threads
-
-    # copy cp dump 
-    copy /proc/cp_dump /data/dontpanic/cp_dump
-
-    write /proc/apanic_console 1
-    write /proc/cp_dump 1
-
-    # Collect ramconsole data
-    copy /proc/last_kmsg /data/dontpanic/last_kmsg
-    chown root log /data/dontpanic/last_kmsg
-    chmod 0640 /data/dontpanic/last_kmsg
 
     # Same reason as /data above
     chown system cache /cache
@@ -237,7 +203,6 @@ on post-fs
     mkdir /data/misc/vpn 0770 system system
     mkdir /data/misc/systemkeys 0700 system system
     mkdir /data/misc/vpn/profiles 0770 system system
-    # give system access to wpa_supplicant.conf for backup and restore
     mkdir /data/misc/wifi 0770 wifi wifi
     chmod 0770 /data/misc/wifi
     chmod 0660 /data/misc/wifi/wpa_supplicant.conf
@@ -352,11 +317,6 @@ on boot
     write /proc/sys/net/ipv4/tcp_adv_win_scale  1
 
     # Permissions for System Server and daemons.
-    chown radio system /sys/android_power/state
-    chown radio system /sys/android_power/request_state
-    chown radio system /sys/android_power/acquire_full_wake_lock
-    chown radio system /sys/android_power/acquire_partial_wake_lock
-    chown radio system /sys/android_power/release_wake_lock
     chown radio system /sys/power/state
     chown radio system /sys/power/wake_lock
     chown radio system /sys/power/wake_unlock
@@ -364,34 +324,17 @@ on boot
     chmod 0660 /sys/power/wake_lock
     chmod 0660 /sys/power/wake_unlock
     chown system system /sys/class/timed_output/vibrator/enable
-    chown system system /sys/class/leds/keyboard-backlight/brightness
-    chown system system /sys/class/leds/lcd-backlight/brightness
     chown system system /sys/class/leds/button-backlight/brightness
-    chown system system /sys/class/leds/jogball-backlight/brightness
-    chown system system /sys/class/leds/red/brightness
-    chown system system /sys/class/leds/green/brightness
-    chown system system /sys/class/leds/blue/brightness
-    chown system system /sys/class/leds/red/device/grpfreq
-    chown system system /sys/class/leds/red/device/grppwm
-    chown system system /sys/class/leds/red/device/blink
-    chown system system /sys/class/leds/red/brightness
-    chown system system /sys/class/leds/green/brightness
-    chown system system /sys/class/leds/blue/brightness
-    chown system system /sys/class/leds/red/device/grpfreq
-    chown system system /sys/class/leds/red/device/grppwm
-    chown system system /sys/class/leds/red/device/blink
-    chown system system /sys/class/timed_output/vibrator/enable
-    chown system system /sys/module/sco/parameters/disable_esco
     chown system system /sys/kernel/ipv4/tcp_wmem_min
     chown system system /sys/kernel/ipv4/tcp_wmem_def
     chown system system /sys/kernel/ipv4/tcp_wmem_max
     chown system system /sys/kernel/ipv4/tcp_rmem_min
     chown system system /sys/kernel/ipv4/tcp_rmem_def
     chown system system /sys/kernel/ipv4/tcp_rmem_max
-    chown root radio /proc/cmdline
-    
+
     # Camera Test Mode
     chown radio system /sys/devices/virtual/camera/camera/camflash
+    chown root camera /sys/devices/virtual/camera/camera/camflash
 
     # for silent reset
     chown system system /proc/dump_enable
@@ -426,8 +369,7 @@ on boot
     # CPU Governor
     chmod 0660 /sys/class/sec/cpu/cpu_gov
     chown root system /sys/class/sec/cpu/cpu_gov
-	
-    # YAMAHA geomagnetic sensor
+
     # Accelerometer
     chown system input /sys/class/input/input3/enable
     chown system input /sys/class/input/input3/delay
@@ -455,9 +397,6 @@ on boot
     # Geomagnetic
     write /sys/class/input/input1/position 0
 
-    # waketime CSP461560
-    chown radio system /sys/module/bcm_fuse_net/parameters/pdp_waketime
-
     # set correct BT adress
     setprop ro.bt.bdaddr_path "/data/misc/bluetooth/.nvmac_bt.info"
 
@@ -478,11 +417,7 @@ on boot
     setprop service.brcm.bt.srv_active 0 
 
     # Define broadcom gps properties 
-    setprop gps.fd.block "false"
-
-    # For datarouter
-    #chown system system /dev/ttygs0
-    #chown system system /dev/dun    
+    setprop gps.fd.block "false"  
 
     start sysinit
     
@@ -498,8 +433,6 @@ on property:boot.ready=1
 
     class_start default
 
-
-## Daemon processes to be run by init.
 
 service ext4-fix /sbin/ext4-fix.sh
     user root
@@ -517,18 +450,15 @@ service ueventd /sbin/ueventd
 on property:ro.secure=0
     start console
 
-# adbd is controlled by the persist.service.adb.enable system property
 service adbd /sbin/adbd
     group shell log
     disabled
 
-# adbd on at boot in emulator
 on property:ro.kernel.qemu=1
     start adbd
 
 on property:persist.service.adb.enable=1
     start adbd
-    write /sys/module/g_android/parameters/product_id 9017
 
 on property:persist.service.adb.enable=0
     stop adbd
@@ -561,15 +491,6 @@ service ril-daemon /system/bin/rild
     socket rild-debug stream 660 radio system
     user root
     group radio cache inet misc audio sdcard_rw net_admin net_raw qcom_oncrpc diag
-
-## for datarouter
-#service DR-daemon /system/bin/drexe
-#    user root
-#    group system radio inet net_raw
-
-#service gps-daemon /system/bin/gpsd
-#    user system
-#    group system inet
 
 service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
     socket zygote stream 660 root system
