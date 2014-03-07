@@ -58,7 +58,6 @@ loglevel 3
     mkdir /mnt/secure/staging 0700 root root
 
     # Directory-target for where the secure container
-    # imagefile directory will be bind-mounted
     mkdir /mnt/secure/asec  0700 root root
 
     # Secure container public mount points.
